@@ -39,6 +39,43 @@ node server.js
 http://127.0.0.1:4173/
 ```
 
+## Setup guiado para Ubuntu 22.04
+
+Se voce vai publicar em um servidor Ubuntu 22.04, use os scripts da pasta `scripts`:
+
+1. Dar permissao de execucao:
+
+```bash
+chmod +x scripts/*.sh
+```
+
+2. Rodar o setup completo:
+
+```bash
+./scripts/setup-ubuntu-22.04.sh
+```
+
+Esse fluxo faz:
+
+- checagem do Ubuntu 22.04
+- instalacao opcional do Node.js 20
+- preenchimento interativo do `.env`
+- criacao do servico `systemd`
+
+Se preferir por etapas:
+
+```bash
+./scripts/configure-env.sh
+./scripts/install-systemd-service.sh
+```
+
+Depois da instalacao do servico:
+
+```bash
+sudo systemctl status onix-form
+sudo journalctl -u onix-form -n 100 --no-pager
+```
+
 ## Contrato do proxy
 
 O frontend envia `multipart/form-data` para:
