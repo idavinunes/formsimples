@@ -1,0 +1,3464 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Onix Saude | Wizard de Documentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #e8f1f8;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-strong: #ffffff;
+      --line: rgba(15, 44, 70, 0.12);
+      --ink: #0f2c46;
+      --muted: #5c7287;
+      --brand: #0057b8;
+      --brand-deep: #0c3255;
+      --accent: #18a4a5;
+      --success: #1f9f6b;
+      --warning: #d59b19;
+      --danger: #d14f5e;
+      --shadow: 0 28px 70px rgba(12, 50, 85, 0.16);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --transition: 220ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(24, 164, 165, 0.18), transparent 28%),
+        radial-gradient(circle at 86% 12%, rgba(0, 87, 184, 0.18), transparent 24%),
+        linear-gradient(180deg, #f5f9fc 0%, var(--bg) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+      background-size: 30px 30px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 92%);
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      height: 100dvh;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(252px, 296px) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .rail,
+    .wizard,
+    .result-overlay__card {
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+    }
+
+    .rail {
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      min-height: 0;
+      overflow: auto;
+      scrollbar-width: none;
+    }
+
+    .rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 87, 184, 0.12);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: var(--brand-deep);
+    }
+
+    .brand-mark {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      transform: rotate(45deg);
+      background: linear-gradient(135deg, var(--accent), var(--brand));
+      box-shadow: 0 0 0 6px rgba(24, 164, 165, 0.12);
+    }
+
+    .rail h1,
+    .screen-title,
+    .block h2,
+    .result-overlay__card h2 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: -0.03em;
+    }
+
+    .rail h1 {
+      font-size: clamp(1.7rem, 2vw, 2.2rem);
+      line-height: 0.95;
+    }
+
+    .rail p,
+    .help,
+    .field-note,
+    .status-text,
+    .mini-card span,
+    .summary-chip span,
+    .summary-grid small,
+    .result-overlay__card p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .block {
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.76);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .block h2 {
+      font-size: 1.02rem;
+      color: var(--brand-deep);
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .progress-head strong {
+      color: var(--brand-deep);
+      font-size: 1.6rem;
+      font-family: "Space Grotesk", sans-serif;
+    }
+
+    .progress-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(15, 44, 70, 0.08);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--brand));
+      transition: width var(--transition);
+    }
+
+    .mini-grid,
+    .status-list,
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .mini-card,
+    .summary-chip {
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      padding: 12px 14px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .mini-card strong,
+    .summary-chip strong {
+      color: var(--brand-deep);
+      font-size: 0.9rem;
+    }
+
+    .summary-chip {
+      gap: 6px;
+    }
+
+    .summary-chip small {
+      display: block;
+      line-height: 1.4;
+    }
+
+    .summary-chip.is-active {
+      border-color: rgba(0, 87, 184, 0.22);
+      background: linear-gradient(135deg, rgba(24, 164, 165, 0.12), rgba(0, 87, 184, 0.1));
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      background: rgba(15, 44, 70, 0.08);
+      color: var(--brand-deep);
+    }
+
+    .status-pill::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status-pill.done {
+      background: rgba(31, 159, 107, 0.12);
+      color: var(--success);
+    }
+
+    .status-pill.pending {
+      background: rgba(213, 155, 25, 0.14);
+      color: var(--warning);
+    }
+
+    .status-pill.error {
+      background: rgba(209, 79, 94, 0.12);
+      color: var(--danger);
+    }
+
+    .status-pill.optional {
+      color: var(--muted);
+    }
+
+    .wizard {
+      border-radius: 32px;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    #wizardForm {
+      min-height: 0;
+      height: 100%;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      overflow: hidden;
+    }
+
+    .wizard-header,
+    .wizard-footer {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(15, 44, 70, 0.08);
+      display: grid;
+      gap: 12px;
+    }
+
+    .wizard-footer {
+      border-bottom: 0;
+      border-top: 1px solid rgba(15, 44, 70, 0.08);
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+
+    .wizard-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .wizard-header-top h2 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--brand-deep);
+    }
+
+    .wizard-header-top span {
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .step-nav {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .step-chip {
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      border-radius: 16px;
+      padding: 10px 9px;
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--muted);
+      text-align: left;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .step-chip:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0, 87, 184, 0.18);
+    }
+
+    .step-chip strong,
+    .step-chip small {
+      display: block;
+    }
+
+    .step-chip strong {
+      color: var(--brand-deep);
+      font-size: 0.82rem;
+    }
+
+    .step-chip small {
+      margin-top: 3px;
+      font-size: 0.68rem;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .step-chip.is-active {
+      background: linear-gradient(135deg, rgba(24, 164, 165, 0.14), rgba(0, 87, 184, 0.12));
+      border-color: rgba(0, 87, 184, 0.22);
+    }
+
+    .step-chip.is-complete {
+      border-color: rgba(31, 159, 107, 0.2);
+    }
+
+    .screen-shell {
+      position: relative;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      opacity: 0;
+      transform: translateX(24px);
+      pointer-events: none;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+
+    .screen.is-active {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .screen-header {
+      display: grid;
+      gap: 4px;
+    }
+
+    .eyebrow {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--brand);
+    }
+
+    .screen-title {
+      font-size: clamp(1.22rem, 1.8vw, 1.72rem);
+    }
+
+    .help {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.42;
+    }
+
+    .screen-body {
+      min-height: 0;
+      overflow: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      scroll-behavior: smooth;
+      padding-right: 4px;
+    }
+
+    .screen-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .grid-compact {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label,
+    .group-label {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--brand-deep);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid rgba(15, 44, 70, 0.14);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .field input[data-uppercase],
+    .field textarea[data-uppercase] {
+      text-transform: uppercase;
+    }
+
+    .field textarea {
+      min-height: 88px;
+      resize: none;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: rgba(0, 87, 184, 0.36);
+      box-shadow: 0 0 0 5px rgba(0, 87, 184, 0.08);
+    }
+
+    .field-note {
+      font-size: 0.74rem;
+      margin: 0;
+      line-height: 1.4;
+    }
+
+    .field-error,
+    .group-error,
+    .upload-error,
+    .term-error {
+      display: block;
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--danger);
+      line-height: 1.45;
+    }
+
+    .field.is-invalid label,
+    .field.is-invalid .group-label {
+      color: var(--danger);
+    }
+
+    .field.is-invalid input,
+    .field.is-invalid select,
+    .field.is-invalid textarea {
+      border-color: rgba(209, 79, 94, 0.4);
+      box-shadow: 0 0 0 4px rgba(209, 79, 94, 0.1);
+      background: rgba(255, 247, 248, 0.98);
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .choice-row.is-invalid {
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(209, 79, 94, 0.24);
+      background: rgba(255, 247, 248, 0.8);
+    }
+
+    .choice,
+    .dependent-tab {
+      flex: 1 1 132px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(15, 44, 70, 0.1);
+      background: rgba(255, 255, 255, 0.76);
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .choice:hover,
+    .dependent-tab:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0, 87, 184, 0.18);
+    }
+
+    .choice input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      accent-color: var(--brand);
+    }
+
+    .choice span,
+    .dependent-tab span {
+      font-weight: 700;
+      color: var(--brand-deep);
+      font-size: 0.84rem;
+    }
+
+    .dependent-wrap,
+    .card,
+    .upload-tile,
+    .review-card {
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .card {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .dependent-wrap {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    .dependent-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .dependent-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .dependent-tab {
+      flex: 0 0 auto;
+      padding: 8px 11px;
+    }
+
+    .dependent-panel-grid {
+      grid-template-columns: minmax(0, 1.45fr) repeat(2, minmax(140px, 0.78fr));
+      align-items: end;
+    }
+
+    .dependent-panel-grid .field.full {
+      grid-column: auto;
+    }
+
+    .dependent-tab.is-active {
+      background: linear-gradient(135deg, rgba(24, 164, 165, 0.14), rgba(0, 87, 184, 0.1));
+      border-color: rgba(0, 87, 184, 0.2);
+    }
+
+    .dependent-panel {
+      display: none;
+    }
+
+    .dependent-panel.is-active {
+      display: block;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .upload-tile {
+      position: relative;
+      padding: 12px 12px 11px;
+      display: grid;
+      gap: 7px;
+      min-height: 0;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .upload-tile:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0, 87, 184, 0.18);
+      box-shadow: 0 10px 18px rgba(12, 50, 85, 0.06);
+    }
+
+    .upload-tile.needs-attention {
+      border-color: rgba(209, 79, 94, 0.28);
+      box-shadow: 0 0 0 4px rgba(209, 79, 94, 0.12);
+    }
+
+    .upload-tile.is-invalid {
+      border-color: rgba(209, 79, 94, 0.28);
+      background: linear-gradient(180deg, rgba(255, 245, 246, 0.98), rgba(255, 250, 250, 0.98));
+      box-shadow: 0 0 0 4px rgba(209, 79, 94, 0.12);
+    }
+
+    .upload-tile input[type="file"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .upload-tile[data-state="done"] {
+      border-color: rgba(31, 159, 107, 0.22);
+      background: linear-gradient(180deg, rgba(242, 255, 248, 0.96), rgba(250, 255, 252, 0.96));
+    }
+
+    .upload-tile[data-state="error"] {
+      border-color: rgba(209, 79, 94, 0.24);
+      background: linear-gradient(180deg, rgba(255, 245, 246, 0.98), rgba(255, 250, 250, 0.98));
+    }
+
+    .upload-tile h3,
+    .review-card h3 {
+      margin: 0;
+      font-size: 0.94rem;
+      color: var(--brand-deep);
+    }
+
+    .upload-meta {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .upload-copy {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .upload-caption {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.35;
+    }
+
+    .upload-name {
+      font-size: 0.8rem;
+      color: var(--ink);
+      line-height: 1.35;
+      min-width: 0;
+      flex: 1 1 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upload-tag {
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: rgba(15, 44, 70, 0.08);
+      color: var(--brand-deep);
+      flex-shrink: 0;
+    }
+
+    .upload-tile[data-state="done"] .upload-tag {
+      background: rgba(31, 159, 107, 0.14);
+      color: var(--success);
+    }
+
+    .upload-tile[data-state="error"] .upload-tag {
+      background: rgba(209, 79, 94, 0.14);
+      color: var(--danger);
+    }
+
+    .upload-action {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: rgba(0, 87, 184, 0.08);
+      color: var(--brand);
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .upload-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .term {
+      display: flex;
+      gap: 12px;
+      align-items: start;
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(15, 44, 70, 0.1);
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .term input {
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
+      accent-color: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .term strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--brand-deep);
+    }
+
+    .term.is-invalid {
+      border-color: rgba(209, 79, 94, 0.28);
+      background: rgba(255, 247, 248, 0.96);
+      box-shadow: 0 0 0 4px rgba(209, 79, 94, 0.1);
+    }
+
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .review-card {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      font-size: 0.84rem;
+    }
+
+    .summary-row span {
+      color: var(--muted);
+    }
+
+    .summary-row strong {
+      color: var(--ink);
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .footer-meta {
+      display: grid;
+      gap: 4px;
+    }
+
+    .footer-meta strong {
+      color: var(--brand-deep);
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .inline-actions {
+      justify-content: flex-start;
+    }
+
+    .small-action {
+      padding: 9px 14px;
+      font-size: 0.78rem;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform var(--transition), opacity var(--transition), box-shadow var(--transition);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .ghost {
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--brand-deep);
+      border: 1px solid rgba(15, 44, 70, 0.12);
+    }
+
+    .soft {
+      background: rgba(0, 87, 184, 0.1);
+      color: var(--brand);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--accent), var(--brand));
+      color: #fff;
+      box-shadow: 0 16px 28px rgba(0, 87, 184, 0.2);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .result-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 18, 28, 0.52);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      z-index: 5;
+    }
+
+    .result-overlay[hidden],
+    .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .result-overlay__card,
+    .modal-card {
+      width: min(860px, 100%);
+      max-height: min(86dvh, 860px);
+      border-radius: 30px;
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 16px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 18, 28, 0.52);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      z-index: 6;
+    }
+
+    .modal-card {
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      background: var(--panel);
+      backdrop-filter: blur(18px);
+    }
+
+    .modal-card--wide {
+      width: min(1120px, 100%);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .archive-layout {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    .archive-list,
+    .archive-detail {
+      min-height: 0;
+      border-radius: 22px;
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .archive-list {
+      padding: 12px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      overflow: auto;
+      scrollbar-width: none;
+    }
+
+    .archive-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .archive-item {
+      width: 100%;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      background: rgba(255, 255, 255, 0.86);
+      color: inherit;
+      display: grid;
+      gap: 6px;
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .archive-item.is-active {
+      border-color: rgba(0, 87, 184, 0.2);
+      background: linear-gradient(135deg, rgba(24, 164, 165, 0.14), rgba(0, 87, 184, 0.12));
+    }
+
+    .archive-item small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .archive-detail {
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .archive-detail-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .archive-empty {
+      min-height: 220px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+    }
+
+    .archive-docs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .archive-doc {
+      border-radius: 18px;
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      background: rgba(255, 255, 255, 0.84);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .archive-doc strong {
+      color: var(--brand-deep);
+    }
+
+    .archive-doc span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .result-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .result-highlight {
+      border-radius: 18px;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(15, 44, 70, 0.08);
+      display: grid;
+      gap: 4px;
+    }
+
+    .result-json {
+      min-height: 0;
+      overflow: auto;
+      border-radius: 20px;
+      background: #102131;
+      color: #dce6f0;
+      padding: 18px;
+      font-size: 0.86rem;
+      line-height: 1.55;
+      scrollbar-width: none;
+    }
+
+    .result-json::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mobile-top {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 2px;
+    }
+
+    .mobile-progress-track {
+      display: none;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 44, 70, 0.08);
+      overflow: hidden;
+    }
+
+    .mobile-progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--brand));
+      transition: width var(--transition);
+    }
+
+    @media (min-width: 960px) {
+      .upload-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        display: none;
+      }
+
+      .mobile-top {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        padding: 8px;
+      }
+
+      .wizard {
+        border-radius: 20px;
+      }
+
+      .wizard-header,
+      .wizard-footer,
+      .screen {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .wizard-header {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        gap: 10px;
+      }
+
+      .wizard-header-top {
+        align-items: start;
+      }
+
+      .wizard-header-top h2 {
+        font-size: 0.9rem;
+      }
+
+      .wizard-header-top span {
+        font-size: 0.78rem;
+        line-height: 1.35;
+      }
+
+      .header-actions .status-text {
+        display: none;
+      }
+
+      .step-nav {
+        display: none;
+      }
+
+      .mobile-progress-track {
+        display: block;
+      }
+
+      .grid,
+      .review-grid,
+      .dependent-panel-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-compact,
+      .settings-grid,
+      .archive-docs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .wizard-footer {
+        grid-template-columns: 1fr;
+        padding-top: 12px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
+        gap: 10px;
+      }
+
+      .archive-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-meta {
+        gap: 2px;
+      }
+
+      .footer-meta .status-text {
+        font-size: 0.74rem;
+        line-height: 1.35;
+      }
+
+      .screen {
+        padding-top: 14px;
+        padding-bottom: 14px;
+        gap: 10px;
+      }
+
+      .screen-header {
+        gap: 3px;
+      }
+
+      .screen-title {
+        font-size: 1.16rem;
+        line-height: 1.02;
+      }
+
+      .help {
+        font-size: 0.76rem;
+        line-height: 1.35;
+      }
+
+      .field {
+        gap: 6px;
+      }
+
+      .field label,
+      .group-label {
+        font-size: 0.82rem;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        padding: 10px 12px;
+        border-radius: 13px;
+      }
+
+      .choice-row,
+      .dependent-tabs {
+        flex-direction: column;
+      }
+
+      .choice,
+      .dependent-tab,
+      .term {
+        padding: 9px 11px;
+        border-radius: 14px;
+      }
+
+      .card,
+      .dependent-wrap,
+      .review-card {
+        padding: 12px;
+      }
+
+      .footer-actions,
+      .footer-actions button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .grid-compact,
+      .settings-grid,
+      .archive-docs {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-top .brand {
+        padding: 8px 11px;
+        font-size: 0.66rem;
+      }
+
+      .wizard-header-top {
+        gap: 8px;
+      }
+
+      .wizard-header {
+        gap: 8px;
+      }
+
+      .header-actions {
+        justify-content: start;
+      }
+
+      .screen-title {
+        font-size: 1.08rem;
+      }
+
+      .screen-body {
+        padding-right: 0;
+      }
+
+      .wizard-footer {
+        padding-left: 12px;
+        padding-right: 12px;
+        gap: 8px;
+      }
+
+      .summary-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="rail">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        Onix Saude
+      </div>
+
+      <div>
+        <h1>Fluxo guiado em uma tela.</h1>
+        <p>Sem rolagem manual da pagina. Cada etapa entra na mesma area com transicao e o formulario usa scroll interno discreto apenas quando necessario.</p>
+      </div>
+
+      <section class="block">
+        <div class="progress-head">
+          <div>
+            <div class="status-text">Preenchimento obrigatorio</div>
+            <strong id="progressPercent">0%</strong>
+          </div>
+          <div class="status-text" id="progressText">0 de 0 concluidos</div>
+        </div>
+        <div class="progress-bar" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Painel rapido</h2>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>Etapa atual</strong>
+            <span id="currentStage">Dados pessoais</span>
+          </div>
+          <div class="mini-card">
+            <strong>Rascunho local</strong>
+            <span id="saveStatus">Aguardando preenchimento.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Seu cadastro</h2>
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>Envio</strong>
+            <span id="integrationStatus">Pronto para finalizar</span>
+          </div>
+          <div class="mini-card">
+            <strong>Confirmacao</strong>
+            <span id="integrationUrlText">Seu protocolo aparece ao concluir</span>
+          </div>
+        </div>
+        <p class="field-note">Seus dados e documentos serao enviados ao concluir o preenchimento.</p>
+      </section>
+
+      <section class="block" id="docSidebarBlock">
+        <h2>Documentos</h2>
+        <div class="status-list" id="docStatusList"></div>
+      </section>
+
+      <section class="block">
+        <h2>Resumo rapido</h2>
+        <div class="summary-grid" id="quickSummary"></div>
+      </section>
+
+      <button type="button" class="ghost" id="clearDraftBtn">Limpar rascunho</button>
+    </aside>
+
+    <main class="wizard">
+      <header class="wizard-header">
+        <div class="mobile-top">
+          <div class="brand">
+            <span class="brand-mark" aria-hidden="true"></span>
+            Onix Saude
+          </div>
+          <div class="status-text" id="mobileProgress">0%</div>
+        </div>
+        <div class="mobile-progress-track" aria-hidden="true">
+          <div class="mobile-progress-fill" id="mobileProgressFill"></div>
+        </div>
+
+        <div class="wizard-header-top">
+          <div>
+            <h2 id="stepCounter">Etapa 1 de 6</h2>
+            <span id="stepDescription">Dados principais do beneficiario titular.</span>
+          </div>
+          <div class="header-actions">
+            <div class="status-text">ANS no 407534</div>
+            <button type="button" class="ghost small-action hidden" data-open-admin>Admin</button>
+          </div>
+        </div>
+
+        <div class="step-nav" id="stepNav"></div>
+      </header>
+
+      <form id="wizardForm" novalidate>
+        <div class="screen-shell">
+          <section class="screen is-active" data-step="1">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 1</span>
+              <h2 class="screen-title">Dados pessoais</h2>
+              <p class="help">Preencha os dados principais do titular.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="grid">
+                <div class="field full">
+                  <label for="nome_completo">Nome completo do titular *</label>
+                  <input id="nome_completo" name="nome_completo" type="text" placeholder="Nome completo" data-uppercase required />
+                </div>
+
+                <div class="field full">
+                  <span class="group-label">Sexo *</span>
+                  <div class="choice-row">
+                    <label class="choice">
+                      <input type="radio" name="sexo" value="Masculino" required />
+                      <span>Masculino</span>
+                    </label>
+                    <label class="choice">
+                      <input type="radio" name="sexo" value="Feminino" required />
+                      <span>Feminino</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="field full">
+                  <label for="nome_mae">Nome da mae *</label>
+                  <input id="nome_mae" name="nome_mae" type="text" placeholder="Nome da mae" data-uppercase required />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-step="2">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 2</span>
+              <h2 class="screen-title">Contato e cadastro</h2>
+              <p class="help">Informe CPF e contatos do titular.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="grid">
+                <div class="field">
+                  <label for="nascimento">Data de nascimento *</label>
+                  <input id="nascimento" name="nascimento" type="date" required />
+                </div>
+
+                <div class="field">
+                  <label for="cpf">CPF *</label>
+                  <input id="cpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" data-mask="cpf" required />
+                  <p class="field-note">O CPF precisa ser valido antes de avancar.</p>
+                </div>
+
+                <div class="field full">
+                  <label for="email">E-mail</label>
+                  <input id="email" name="email" type="email" placeholder="nome@exemplo.com" />
+                </div>
+
+                <div class="field">
+                  <label for="telefone_fixo">Telefone fixo</label>
+                  <input id="telefone_fixo" name="telefone_fixo" type="tel" inputmode="numeric" placeholder="(00) 0000-0000" data-mask="landline" />
+                </div>
+
+                <div class="field">
+                  <label for="celular">Celular / WhatsApp *</label>
+                  <input id="celular" name="celular" type="tel" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000" data-mask="mobile" required />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-step="3">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 3</span>
+              <h2 class="screen-title">Dependentes</h2>
+              <p class="help">Inclua dependentes somente se houver.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="grid">
+                <div class="field full">
+                  <span class="group-label">Possui dependentes para inclusao? *</span>
+                  <div class="choice-row">
+                    <label class="choice">
+                      <input type="radio" name="possui_dependentes" value="sim" required />
+                      <span>Sim, possuo dependentes</span>
+                    </label>
+                    <label class="choice">
+                      <input type="radio" name="possui_dependentes" value="nao" required />
+                      <span>Nao possuo dependentes</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="field hidden" id="dependentsCountField">
+                  <label for="quantidade_dependentes">Quantidade de dependentes</label>
+                  <select id="quantidade_dependentes" name="quantidade_dependentes" disabled>
+                    <option value="1">1 dependente</option>
+                    <option value="2">2 dependentes</option>
+                    <option value="3">3 dependentes</option>
+                    <option value="4">4 dependentes</option>
+                    <option value="5">5 dependentes</option>
+                    <option value="6">6 dependentes</option>
+                    <option value="7">7 dependentes</option>
+                    <option value="8">8 dependentes</option>
+                    <option value="9">9 dependentes</option>
+                    <option value="10">10 dependentes</option>
+                  </select>
+                </div>
+
+                <div class="field hidden" id="dependentsObsField">
+                  <label for="observacao_dependentes">Observacao sobre dependentes</label>
+                  <input id="observacao_dependentes" name="observacao_dependentes" type="text" placeholder="Ex.: conjuge e 1 filho" data-uppercase disabled />
+                </div>
+
+                <div class="full hidden" id="dependentsWrap">
+                  <div class="dependent-wrap">
+                    <div class="dependent-head">
+                      <div>
+                        <strong style="color: var(--brand-deep);">Cadastro de dependentes</strong>
+                        <p class="field-note" id="dependentsHint">Selecione o dependente e preencha.</p>
+                      </div>
+                      <div class="dependent-tabs" id="dependentTabs"></div>
+                    </div>
+
+                    <div id="dependentPanelsHost"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-step="4">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 4</span>
+              <h2 class="screen-title">Vinculo funcional</h2>
+              <p class="help">Informe os dados funcionais do servidor.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="grid">
+                <div class="field full">
+                  <label for="corretor">Nome do corretor *</label>
+                  <input id="corretor" name="corretor" type="text" placeholder="Nome do corretor" data-uppercase required />
+                </div>
+
+                <div class="field full">
+                  <span class="group-label">Regime de contratacao *</span>
+                  <div class="choice-row">
+                    <label class="choice">
+                      <input type="radio" name="regime_contratacao" value="SERVIDOR PUBLICO ESTATUTARIO" required />
+                      <span>Estatutario</span>
+                    </label>
+                    <label class="choice">
+                      <input type="radio" name="regime_contratacao" value="SERVIDOR PUBLICO COMISSIONADO" required />
+                      <span>Comissionado</span>
+                    </label>
+                    <label class="choice">
+                      <input type="radio" name="regime_contratacao" value="SERVIDOR PUBLICO APOSENTADO" required />
+                      <span>Aposentado</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="setor_lotacao">Setor / Lotacao *</label>
+                  <input id="setor_lotacao" name="setor_lotacao" type="text" placeholder="Setor / Lotacao" data-uppercase required />
+                </div>
+
+                <div class="field">
+                  <label for="cargo">Cargo *</label>
+                  <input id="cargo" name="cargo" type="text" placeholder="Cargo" data-uppercase required />
+                </div>
+
+                <div class="field full">
+                  <label for="matricula">Matricula *</label>
+                  <input id="matricula" name="matricula" type="text" placeholder="Matricula" data-uppercase required />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-step="5">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 5</span>
+              <h2 class="screen-title">Anexar documentos</h2>
+              <p class="help">Toque em cada item para anexar o arquivo correspondente. Limite maximo por arquivo: 20 MB.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="upload-grid">
+                <label class="upload-tile" data-state="pending">
+                  <input class="upload-input" type="file" name="identidade_cpf" accept=".pdf,.png,.jpg,.jpeg,image/*" data-label="Identidade com CPF ou CNH" required />
+                  <div class="upload-meta">
+                    <div class="upload-copy">
+                      <h3>Identidade com CPF</h3>
+                      <p class="upload-caption">Documento principal do titular.</p>
+                    </div>
+                    <span class="upload-tag">Pendente</span>
+                  </div>
+                  <div class="upload-bottom">
+                    <strong class="upload-name">Nenhum arquivo anexado</strong>
+                    <span class="upload-action">Selecionar</span>
+                  </div>
+                </label>
+
+                <label class="upload-tile" data-state="optional">
+                  <input class="upload-input" type="file" name="contracheque" accept=".pdf,.png,.jpg,.jpeg,image/*" data-label="Ultimo contracheque" />
+                  <div class="upload-meta">
+                    <div class="upload-copy">
+                      <h3>Ultimo contracheque</h3>
+                      <p class="upload-caption">Opcional neste momento.</p>
+                    </div>
+                    <span class="upload-tag">Opcional</span>
+                  </div>
+                  <div class="upload-bottom">
+                    <strong class="upload-name">Pode ser enviado depois</strong>
+                    <span class="upload-action">Selecionar</span>
+                  </div>
+                </label>
+
+                <label class="upload-tile" data-state="pending">
+                  <input class="upload-input" type="file" name="comprovante_residencia" accept=".pdf,.png,.jpg,.jpeg,image/*" data-label="Comprovante de residencia" required />
+                  <div class="upload-meta">
+                    <div class="upload-copy">
+                      <h3>Comprovante de residencia</h3>
+                      <p class="upload-caption">Use um comprovante legivel e recente.</p>
+                    </div>
+                    <span class="upload-tag">Pendente</span>
+                  </div>
+                  <div class="upload-bottom">
+                    <strong class="upload-name">Nenhum arquivo anexado</strong>
+                    <span class="upload-action">Selecionar</span>
+                  </div>
+                </label>
+
+                <label class="upload-tile" data-state="pending">
+                  <input class="upload-input" type="file" name="declaracao_saude" accept=".pdf,.png,.jpg,.jpeg,image/*" data-label="Declaracao de saude" required />
+                  <div class="upload-meta">
+                    <div class="upload-copy">
+                      <h3>Declaracao de saude</h3>
+                      <p class="upload-caption">Ultimo documento obrigatorio do fluxo.</p>
+                    </div>
+                    <span class="upload-tag">Pendente</span>
+                  </div>
+                  <div class="upload-bottom">
+                    <strong class="upload-name">Nenhum arquivo anexado</strong>
+                    <span class="upload-action">Selecionar</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="screen" data-step="6">
+            <div class="screen-header">
+              <span class="eyebrow">Etapa 6</span>
+              <h2 class="screen-title">Termos e revisao</h2>
+              <p class="help">Confirme os termos e finalize o cadastro.</p>
+            </div>
+
+            <div class="screen-body">
+              <div class="grid">
+                <div class="card full" style="gap: 10px;">
+                  <label class="term">
+                    <input id="solicitacao_auxilio" name="solicitacao_auxilio" type="checkbox" required />
+                    <span>
+                      <strong>Solicitacao de inclusao do beneficio</strong>
+                      Conforme o Decreto Municipal no 2937/2023, solicito a inclusao do beneficio na minha folha de pagamento.
+                    </span>
+                  </label>
+
+                  <label class="term">
+                    <input id="autorizacao_desconto" name="autorizacao_desconto" type="checkbox" required />
+                    <span>
+                      <strong>Autorizacao de desconto em contracheque</strong>
+                      Autorizo o desconto do Auxilio-Saude no contracheque, incluindo eventual inclusao de dependentes.
+                    </span>
+                  </label>
+                </div>
+
+                <div class="field full">
+                  <label for="assinatura_nome">Assinatura eletronica do titular *</label>
+                  <input id="assinatura_nome" name="assinatura_nome" type="text" placeholder="Digite o nome completo do titular" data-uppercase required />
+                  <p class="field-note">Digite exatamente o nome do titular para registrar o aceite final desta proposta.</p>
+                </div>
+
+                <div class="field full">
+                  <label for="observacoes">Observacoes finais</label>
+                  <textarea id="observacoes" name="observacoes" data-uppercase placeholder="Campo opcional para observacoes administrativas ou pendencias."></textarea>
+                </div>
+
+                <div class="full">
+                  <div class="review-grid" id="reviewGrid"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="wizard-footer">
+          <div class="footer-meta">
+            <strong id="footerTitle">Dados pessoais</strong>
+            <span class="status-text" id="footerHint">A experiencia permanece na mesma area de tela durante todo o fluxo.</span>
+          </div>
+
+          <div class="footer-actions">
+            <button type="button" class="ghost" id="prevBtn">Voltar</button>
+            <button type="button" class="soft" id="nextBtn">Continuar</button>
+            <button type="submit" class="primary hidden" id="submitBtn">Finalizar onboarding</button>
+          </div>
+        </footer>
+      </form>
+    </main>
+  </div>
+
+  <div class="result-overlay" id="resultOverlay" hidden>
+    <div class="result-overlay__card">
+      <div class="result-head">
+        <div>
+          <span class="eyebrow">Concluido</span>
+          <h2>Cadastro concluido</h2>
+          <p>Revise o protocolo abaixo e guarde essa confirmacao.</p>
+        </div>
+        <button type="button" class="primary" id="closeOverlayBtn">OK, iniciar novo</button>
+      </div>
+
+      <div class="result-highlight">
+        <strong id="protocolText">Protocolo:</strong>
+        <span class="status-text" id="resultMeta"></span>
+      </div>
+
+      <pre class="result-json" id="payloadView"></pre>
+
+      <div class="footer-actions">
+        <button type="button" class="ghost" id="restartBtn">Voltar ao inicio</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="adminOverlay" hidden>
+    <div class="modal-card modal-card--wide">
+      <div class="result-head">
+        <div>
+          <span class="eyebrow">Admin local</span>
+          <h2>Protocolos e documentos arquivados</h2>
+          <p>Este painel lista os envios gravados neste navegador. Serve para teste local e conferencia rapida antes do backend definitivo.</p>
+        </div>
+        <button type="button" class="ghost" id="closeAdminBtn">Fechar</button>
+      </div>
+
+      <div class="archive-layout">
+        <aside class="archive-list" id="archiveList"></aside>
+
+        <section class="archive-detail">
+          <div class="archive-detail-head">
+            <div>
+              <strong id="archiveProtocolText">Nenhum protocolo selecionado</strong>
+              <div class="status-text" id="archiveMetaText">Abra um envio para ver os dados e os anexos locais.</div>
+            </div>
+            <button type="button" class="ghost small-action" id="downloadArchiveJsonBtn" disabled>Baixar JSON</button>
+          </div>
+
+          <div class="review-grid" id="archiveSummary"></div>
+          <div class="archive-docs" id="archiveDocs"></div>
+          <pre class="result-json" id="archivePayloadView">Selecione um protocolo na lista ao lado.</pre>
+        </section>
+      </div>
+
+      <div class="footer-actions">
+        <button type="button" class="ghost" id="refreshArchiveBtn">Atualizar lista</button>
+        <button type="button" class="ghost" id="clearArchiveBtn">Limpar historico</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "onix-wizard-screen-v3";
+    const SUBMISSION_ARCHIVE_KEY = "onix-wizard-submissions-v1";
+    const ARCHIVE_DB_NAME = "onix-wizard-archive-db";
+    const ARCHIVE_DB_VERSION = 1;
+    const ARCHIVE_FILE_STORE = "submission-files";
+    const MAX_DEPENDENTS = 10;
+    const SUBMIT_ENDPOINT = "/api/submit";
+    const HEALTH_ENDPOINT = "/api/health";
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
+    const INTEGRATION = {
+      requestTimeoutMs: 45000,
+      saveLocalArchive: true
+    };
+
+    const stepMeta = [
+      { title: "Dados pessoais", description: "Dados principais do beneficiario titular." },
+      { title: "Contato e cadastro", description: "Nascimento, CPF e contatos com validacao." },
+      { title: "Dependentes", description: "Inclusao opcional com um cartao por vez." },
+      { title: "Vinculo funcional", description: "Dados profissionais do servidor." },
+      { title: "Anexar documentos", description: "Uploads obrigatorios e opcionais." },
+      { title: "Termos e revisao", description: "Aceites formais e conferencia final." }
+    ];
+
+    const form = document.getElementById("wizardForm");
+    const screens = Array.from(document.querySelectorAll(".screen"));
+    const stepNav = document.getElementById("stepNav");
+    const progressFill = document.getElementById("progressFill");
+    const progressPercent = document.getElementById("progressPercent");
+    const progressText = document.getElementById("progressText");
+    const currentStage = document.getElementById("currentStage");
+    const saveStatus = document.getElementById("saveStatus");
+    const quickSummary = document.getElementById("quickSummary");
+    const integrationStatus = document.getElementById("integrationStatus");
+    const integrationUrlText = document.getElementById("integrationUrlText");
+    const docSidebarBlock = document.getElementById("docSidebarBlock");
+    const docStatusList = document.getElementById("docStatusList");
+    const stepCounter = document.getElementById("stepCounter");
+    const stepDescription = document.getElementById("stepDescription");
+    const footerTitle = document.getElementById("footerTitle");
+    const footerHint = document.getElementById("footerHint");
+    const mobileProgress = document.getElementById("mobileProgress");
+    const mobileProgressFill = document.getElementById("mobileProgressFill");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const clearDraftBtn = document.getElementById("clearDraftBtn");
+    const resultOverlay = document.getElementById("resultOverlay");
+    const payloadView = document.getElementById("payloadView");
+    const protocolText = document.getElementById("protocolText");
+    const resultMeta = document.getElementById("resultMeta");
+    const closeOverlayBtn = document.getElementById("closeOverlayBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const reviewGrid = document.getElementById("reviewGrid");
+    const openAdminButtons = Array.from(document.querySelectorAll("[data-open-admin]"));
+    const adminOverlay = document.getElementById("adminOverlay");
+    const archiveList = document.getElementById("archiveList");
+    const archiveProtocolText = document.getElementById("archiveProtocolText");
+    const archiveMetaText = document.getElementById("archiveMetaText");
+    const archiveSummary = document.getElementById("archiveSummary");
+    const archiveDocs = document.getElementById("archiveDocs");
+    const archivePayloadView = document.getElementById("archivePayloadView");
+    const refreshArchiveBtn = document.getElementById("refreshArchiveBtn");
+    const clearArchiveBtn = document.getElementById("clearArchiveBtn");
+    const closeAdminBtn = document.getElementById("closeAdminBtn");
+    const downloadArchiveJsonBtn = document.getElementById("downloadArchiveJsonBtn");
+    const dependentsCountField = document.getElementById("dependentsCountField");
+    const dependentsObsField = document.getElementById("dependentsObsField");
+    const dependentsWrap = document.getElementById("dependentsWrap");
+    const dependentsHint = document.getElementById("dependentsHint");
+    const dependentsCount = document.getElementById("quantidade_dependentes");
+    const dependentsObs = document.getElementById("observacao_dependentes");
+    const dependentTabs = document.getElementById("dependentTabs");
+    const dependentPanelsHost = document.getElementById("dependentPanelsHost");
+    const uploadInputs = Array.from(document.querySelectorAll(".upload-input"));
+    const signatureInput = document.getElementById("assinatura_nome");
+    const isAdminMode = new URLSearchParams(window.location.search).get("admin") === "1";
+
+    let currentStep = 1;
+    let activeDependent = 1;
+    let isSubmitting = false;
+    let archiveSelection = "";
+    let uploadScrollSnapshot = null;
+    let dependentPanels = [];
+    const invalidSteps = new Set();
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function digitsOnly(value) {
+      return String(value || "").replace(/\D/g, "");
+    }
+
+    function formatCpf(value) {
+      const digits = digitsOnly(value).slice(0, 11);
+      return digits
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+
+    function formatPhone(value) {
+      const digits = digitsOnly(value).slice(0, 11);
+      if (digits.length <= 10) {
+        return digits
+          .replace(/^(\d{2})(\d)/, "($1) $2")
+          .replace(/(\d{4})(\d)/, "$1-$2");
+      }
+      return digits
+        .replace(/^(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2");
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return "";
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function normalizeComparableText(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+    }
+
+    function updateIntegrationSummary(status) {
+      if (!status) {
+        integrationStatus.textContent = "Preparando envio";
+        integrationUrlText.textContent = "Seu protocolo aparece ao concluir";
+        return;
+      }
+
+      if (status.server !== "ok") {
+        integrationStatus.textContent = "Pronto para finalizar";
+        integrationUrlText.textContent = "Seu protocolo aparece ao concluir";
+        return;
+      }
+
+      integrationStatus.textContent = status.webhookConfigured
+        ? "Envio disponivel"
+        : "Pronto para finalizar";
+      integrationUrlText.textContent = "Seu protocolo aparece ao concluir";
+    }
+
+    async function refreshIntegrationStatus() {
+      try {
+        const response = await fetch(HEALTH_ENDPOINT, { cache: "no-store" });
+        if (!response.ok) throw new Error("Healthcheck indisponivel.");
+        const payload = await response.json();
+        if (payload.timeoutMs) {
+          INTEGRATION.requestTimeoutMs = Math.max(5000, Number(payload.timeoutMs) || INTEGRATION.requestTimeoutMs);
+        }
+        updateIntegrationSummary({
+          server: "ok",
+          webhookConfigured: Boolean(payload.webhookConfigured),
+          configSource: payload.configSource || ".env do servidor"
+        });
+      } catch (error) {
+        updateIntegrationSummary({ server: "missing" });
+      }
+    }
+
+    function getSubmissionArchiveIndex() {
+      try {
+        return JSON.parse(localStorage.getItem(SUBMISSION_ARCHIVE_KEY) || "[]");
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setSubmissionArchiveIndex(records) {
+      try {
+        localStorage.setItem(SUBMISSION_ARCHIVE_KEY, JSON.stringify(records.slice(0, 25)));
+      } catch (error) {
+        // no-op
+      }
+    }
+
+    function openArchiveDb() {
+      return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+          reject(new Error("IndexedDB indisponivel neste navegador."));
+          return;
+        }
+
+        const request = indexedDB.open(ARCHIVE_DB_NAME, ARCHIVE_DB_VERSION);
+
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(ARCHIVE_FILE_STORE)) {
+            db.createObjectStore(ARCHIVE_FILE_STORE, { keyPath: "protocolo" });
+          }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Falha ao abrir o arquivo local."));
+      });
+    }
+
+    async function saveSubmissionFiles(protocolo) {
+      const files = uploadInputs
+        .map(input => {
+          const file = input.files[0];
+          if (!file) return null;
+          return {
+            campo: input.name,
+            label: input.dataset.label,
+            nome: file.name,
+            tipo: file.type || "application/octet-stream",
+            tamanho: file.size,
+            blob: file
+          };
+        })
+        .filter(Boolean);
+
+      if (!files.length) return false;
+
+      const db = await openArchiveDb();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(ARCHIVE_FILE_STORE, "readwrite");
+          transaction.objectStore(ARCHIVE_FILE_STORE).put({
+            protocolo,
+            arquivos: files,
+            atualizado_em: new Date().toISOString()
+          });
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error || new Error("Falha ao gravar os arquivos locais."));
+        });
+        return true;
+      } finally {
+        db.close();
+      }
+    }
+
+    async function loadSubmissionFiles(protocolo) {
+      const db = await openArchiveDb();
+      try {
+        return await new Promise((resolve, reject) => {
+          const transaction = db.transaction(ARCHIVE_FILE_STORE, "readonly");
+          const request = transaction.objectStore(ARCHIVE_FILE_STORE).get(protocolo);
+          request.onsuccess = () => resolve(request.result?.arquivos || []);
+          request.onerror = () => reject(request.error || new Error("Falha ao carregar os arquivos locais."));
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    async function clearSubmissionFiles() {
+      const db = await openArchiveDb();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(ARCHIVE_FILE_STORE, "readwrite");
+          transaction.objectStore(ARCHIVE_FILE_STORE).clear();
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error || new Error("Falha ao limpar os arquivos locais."));
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    function validateCpf(value) {
+      const digits = digitsOnly(value);
+      if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) return false;
+
+      let sum = 0;
+      for (let i = 0; i < 9; i += 1) {
+        sum += Number(digits[i]) * (10 - i);
+      }
+      let first = (sum * 10) % 11;
+      if (first === 10) first = 0;
+      if (first !== Number(digits[9])) return false;
+
+      sum = 0;
+      for (let i = 0; i < 10; i += 1) {
+        sum += Number(digits[i]) * (11 - i);
+      }
+      let second = (sum * 10) % 11;
+      if (second === 10) second = 0;
+      return second === Number(digits[10]);
+    }
+
+    function getHasDependents() {
+      return form.querySelector('input[name="possui_dependentes"]:checked')?.value === "sim";
+    }
+
+    function getDependentsCount() {
+      if (!getHasDependents()) return 0;
+      const total = Number(dependentsCount.value || 1);
+      return Math.min(Math.max(total, 1), MAX_DEPENDENTS);
+    }
+
+    function buildDependentPanel(index) {
+      return `
+        <div class="dependent-panel ${index === 1 ? "is-active" : ""}" data-dependent-panel="${index}">
+          <div class="grid dependent-panel-grid">
+            <div class="field full">
+              <label for="dependente_${index}_nome">Nome completo *</label>
+              <input id="dependente_${index}_nome" name="dependente_${index}_nome" type="text" placeholder="Nome completo" data-uppercase />
+            </div>
+            <div class="field">
+              <label for="dependente_${index}_nascimento">Nascimento *</label>
+              <input id="dependente_${index}_nascimento" name="dependente_${index}_nascimento" type="date" />
+            </div>
+            <div class="field">
+              <label for="dependente_${index}_parentesco">Parentesco *</label>
+              <input id="dependente_${index}_parentesco" name="dependente_${index}_parentesco" type="text" placeholder="Parentesco" data-uppercase />
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDependentPanels() {
+      dependentPanelsHost.innerHTML = Array.from({ length: MAX_DEPENDENTS }, (_, index) => {
+        return buildDependentPanel(index + 1);
+      }).join("");
+      dependentPanels = Array.from(dependentPanelsHost.querySelectorAll(".dependent-panel"));
+    }
+
+    function updateStepNav() {
+      stepNav.innerHTML = stepMeta.map((step, index) => `
+        <button type="button" class="step-chip ${index + 1 === currentStep ? "is-active" : ""} ${index + 1 < currentStep ? "is-complete" : ""}" data-step="${index + 1}">
+          <strong>${index + 1}. ${escapeHtml(step.title)}</strong>
+          <small>${escapeHtml(step.description)}</small>
+        </button>
+      `).join("");
+    }
+
+    function showDependentPanel(index) {
+      if (!dependentPanels.length) return;
+      activeDependent = index;
+      dependentPanels.forEach(panel => {
+        panel.classList.toggle("is-active", Number(panel.dataset.dependentPanel) === index);
+      });
+      dependentTabs.querySelectorAll(".dependent-tab").forEach(button => {
+        button.classList.toggle("is-active", Number(button.dataset.dependentTab) === index);
+      });
+    }
+
+    function syncDependents() {
+      const hasDependents = getHasDependents();
+      const total = getDependentsCount();
+
+      dependentsCountField.classList.toggle("hidden", !hasDependents);
+      dependentsObsField.classList.toggle("hidden", !hasDependents);
+      dependentsWrap.classList.toggle("hidden", !hasDependents);
+
+      dependentsCount.disabled = !hasDependents;
+      dependentsObs.disabled = !hasDependents;
+
+      dependentTabs.innerHTML = "";
+
+      for (let index = 1; index <= MAX_DEPENDENTS; index += 1) {
+        const enabled = hasDependents && index <= total;
+        const inputs = Array.from(document.querySelectorAll('[name^="dependente_' + index + '_"]'));
+
+        inputs.forEach(input => {
+          input.disabled = !enabled;
+          input.required = enabled;
+        });
+
+        const panel = dependentPanels[index - 1];
+        panel.classList.toggle("hidden", !enabled);
+
+        if (enabled) {
+          dependentTabs.insertAdjacentHTML("beforeend", `
+            <button type="button" class="dependent-tab ${index === activeDependent ? "is-active" : ""}" data-dependent-tab="${index}">
+              <span>Dependente ${index}</span>
+            </button>
+          `);
+        }
+      }
+
+      if (!hasDependents) {
+        dependentsHint.textContent = "Nenhum dependente sera incluido neste envio.";
+        activeDependent = 1;
+      } else {
+        if (activeDependent > total) activeDependent = 1;
+        dependentsHint.textContent = total + " dependente(s) liberado(s), um por vez.";
+      }
+
+      showDependentPanel(activeDependent);
+    }
+
+    function validateCpfField() {
+      const input = document.getElementById("cpf");
+      const digits = digitsOnly(input.value);
+
+      if (!digits) {
+        input.setCustomValidity("");
+        return;
+      }
+
+      if (digits.length < 11) {
+        input.setCustomValidity("Informe um CPF completo.");
+        return;
+      }
+
+      input.setCustomValidity(validateCpf(input.value) ? "" : "CPF invalido.");
+    }
+
+    function validatePhoneField(input) {
+      const digits = digitsOnly(input.value);
+      if (!digits) {
+        input.setCustomValidity("");
+        return;
+      }
+
+      const valid = input.dataset.mask === "mobile"
+        ? digits.length === 11
+        : digits.length === 10 || digits.length === 11;
+
+      input.setCustomValidity(valid ? "" : "Telefone com DDD invalido.");
+    }
+
+    function validateSignatureField() {
+      const titularNome = normalizeComparableText(form.elements.nome_completo?.value);
+      const assinaturaNome = normalizeComparableText(signatureInput.value);
+
+      if (!assinaturaNome || !titularNome) {
+        signatureInput.setCustomValidity("");
+        return;
+      }
+
+      signatureInput.setCustomValidity(
+        assinaturaNome === titularNome
+          ? ""
+          : "A assinatura eletronica precisa repetir o nome completo do titular."
+      );
+    }
+
+    function validateFileInput(input) {
+      const file = input.files[0];
+      if (!file) {
+        input.dataset.fileError = "";
+        input.setCustomValidity("");
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        input.dataset.fileError = "O arquivo excede 20 MB.";
+        input.setCustomValidity("O arquivo excede 20 MB.");
+        return;
+      }
+
+      input.dataset.fileError = "";
+      input.setCustomValidity("");
+    }
+
+    function updateUploadTiles() {
+      uploadInputs.forEach(input => {
+        validateFileInput(input);
+        const tile = input.closest(".upload-tile");
+        const tag = tile.querySelector(".upload-tag");
+        const name = tile.querySelector(".upload-name");
+        const file = input.files[0];
+
+        if (input.dataset.fileError) {
+          tile.dataset.state = "error";
+          tag.textContent = "Erro";
+          name.textContent = input.dataset.fileError;
+          return;
+        }
+
+        if (file) {
+          tile.dataset.state = "done";
+          tag.textContent = "Pronto";
+          name.textContent = file.name + " • " + formatBytes(file.size);
+          return;
+        }
+
+        tile.dataset.state = input.required ? "pending" : "optional";
+        tag.textContent = input.required ? "Pendente" : "Opcional";
+        name.textContent = input.required ? "Nenhum arquivo anexado" : "Pode ser enviado depois";
+      });
+    }
+
+    function rememberUploadScrollContext(input) {
+      if (uploadScrollSnapshot) return;
+
+      const screenBody = input.closest(".screen-body");
+      uploadScrollSnapshot = {
+        screenBody,
+        screenScrollTop: screenBody ? screenBody.scrollTop : 0,
+        railScrollTop: window.innerWidth > 1100 ? document.querySelector(".rail")?.scrollTop || 0 : 0
+      };
+    }
+
+    function restoreUploadScrollContext() {
+      if (!uploadScrollSnapshot) return;
+
+      const { screenBody, screenScrollTop, railScrollTop } = uploadScrollSnapshot;
+      uploadScrollSnapshot = null;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (screenBody) {
+            screenBody.scrollTop = screenScrollTop;
+          }
+
+          const rail = document.querySelector(".rail");
+          if (rail && window.innerWidth > 1100) {
+            rail.scrollTop = railScrollTop;
+          }
+        });
+      });
+    }
+
+    function getUniqueRequiredFields() {
+      const all = Array.from(form.querySelectorAll("input, select, textarea")).filter(field => field.required && !field.disabled);
+      const radioGroups = new Set();
+
+      return all.filter(field => {
+        if (field.type === "radio") {
+          if (radioGroups.has(field.name)) return false;
+          radioGroups.add(field.name);
+        }
+        return true;
+      });
+    }
+
+    function getFieldsByStep(step) {
+      const screen = screens.find(item => Number(item.dataset.step) === step);
+      return Array.from(screen.querySelectorAll("input, select, textarea")).filter(field => !field.disabled);
+    }
+
+    function getFieldLabel(field) {
+      if (field.type === "file") {
+        return field.dataset.label || "documento";
+      }
+
+      if (field.type === "checkbox") {
+        const strong = field.closest(".term")?.querySelector("strong");
+        return strong?.textContent?.trim() || "este termo";
+      }
+
+      const wrapper = field.closest(".field");
+      const label = wrapper?.querySelector("label, .group-label");
+      return label?.textContent?.replace(/\s*\*$/, "").trim() || "este campo";
+    }
+
+    function getStepStatus(step) {
+      const fields = getFieldsByStep(step).filter(field => field.required);
+      applyFieldValidation(fields);
+      const radioGroups = new Set();
+      let missing = 0;
+      let complete = 0;
+      const missingLabels = [];
+
+      fields.forEach(field => {
+        if (field.type === "radio") {
+          if (radioGroups.has(field.name)) return;
+          radioGroups.add(field.name);
+          if (!form.querySelector('input[name="' + field.name + '"]:checked')) {
+            missing += 1;
+            missingLabels.push(getFieldLabel(field));
+          } else {
+            complete += 1;
+          }
+          return;
+        }
+
+        if (field.type === "checkbox") {
+          if (!field.checked) {
+            missing += 1;
+            missingLabels.push(getFieldLabel(field));
+          } else {
+            complete += 1;
+          }
+          return;
+        }
+
+        if (field.type === "file") {
+          if (!field.files[0] || field.dataset.fileError) {
+            missing += 1;
+            missingLabels.push(getFieldLabel(field));
+          } else {
+            complete += 1;
+          }
+          return;
+        }
+
+        if (!field.value.trim() || !field.checkValidity()) {
+          missing += 1;
+          missingLabels.push(getFieldLabel(field));
+        } else {
+          complete += 1;
+        }
+      });
+
+      return {
+        total: fields.length,
+        complete,
+        missing,
+        missingLabels,
+        ready: missing === 0
+      };
+    }
+
+    function applyFieldValidation(fields) {
+      fields.forEach(field => {
+        if (field.id === "cpf") validateCpfField();
+        if (field.id === "assinatura_nome") validateSignatureField();
+        if (field.dataset.mask === "mobile" || field.dataset.mask === "landline") validatePhoneField(field);
+        if (field.type === "file") validateFileInput(field);
+      });
+    }
+
+    function getErrorMessage(field) {
+      if (field.type === "file") {
+        return field.dataset.fileError || "Anexe " + getFieldLabel(field) + " para continuar.";
+      }
+
+      if (field.type === "checkbox") {
+        return "Aceite " + getFieldLabel(field) + " para continuar.";
+      }
+
+      if (field.type === "radio") {
+        return "Selecione uma opcao para " + getFieldLabel(field) + ".";
+      }
+
+      if (field.id === "cpf" && field.value.trim()) {
+        return field.validationMessage || "Informe um CPF valido.";
+      }
+
+      if ((field.dataset.mask === "mobile" || field.dataset.mask === "landline") && field.value.trim()) {
+        return field.validationMessage || "Informe um telefone valido.";
+      }
+
+      if (field.id === "assinatura_nome" && field.value.trim()) {
+        return field.validationMessage || "Repita o nome completo do titular para assinar.";
+      }
+
+      return field.validationMessage || "Preencha " + getFieldLabel(field) + ".";
+    }
+
+    function upsertMessage(container, className, message) {
+      let node = container.querySelector("." + className);
+      if (!message) {
+        if (node) node.remove();
+        return;
+      }
+
+      if (!node) {
+        node = document.createElement("small");
+        node.className = className;
+        container.appendChild(node);
+      }
+
+      node.textContent = message;
+    }
+
+    function clearStepErrors(step) {
+      const screen = screens.find(item => Number(item.dataset.step) === step);
+      if (!screen) return;
+
+      screen.querySelectorAll(".field.is-invalid").forEach(node => node.classList.remove("is-invalid"));
+      screen.querySelectorAll(".choice-row.is-invalid").forEach(node => node.classList.remove("is-invalid"));
+      screen.querySelectorAll(".upload-tile.is-invalid").forEach(node => node.classList.remove("is-invalid"));
+      screen.querySelectorAll(".term.is-invalid").forEach(node => node.classList.remove("is-invalid"));
+      screen.querySelectorAll(".field-error, .group-error, .upload-error, .term-error").forEach(node => node.remove());
+    }
+
+    function renderStepErrors(step) {
+      clearStepErrors(step);
+      if (!invalidSteps.has(step)) return;
+
+      const fields = getFieldsByStep(step);
+      applyFieldValidation(fields);
+      const radioGroups = new Set();
+
+      fields.forEach(field => {
+        if (field.checkValidity()) return;
+
+        if (field.type === "radio") {
+          if (radioGroups.has(field.name)) return;
+          radioGroups.add(field.name);
+          const wrapper = field.closest(".field");
+          const group = wrapper?.querySelector(".choice-row");
+          wrapper?.classList.add("is-invalid");
+          group?.classList.add("is-invalid");
+          if (wrapper) upsertMessage(wrapper, "group-error", getErrorMessage(field));
+          return;
+        }
+
+        if (field.type === "file") {
+          const tile = field.closest(".upload-tile");
+          tile?.classList.add("is-invalid");
+          if (tile) upsertMessage(tile, "upload-error", getErrorMessage(field));
+          return;
+        }
+
+        if (field.type === "checkbox") {
+          const term = field.closest(".term");
+          term?.classList.add("is-invalid");
+          if (term) upsertMessage(term, "term-error", getErrorMessage(field));
+          return;
+        }
+
+        const wrapper = field.closest(".field");
+        wrapper?.classList.add("is-invalid");
+        if (wrapper) upsertMessage(wrapper, "field-error", getErrorMessage(field));
+      });
+    }
+
+    function getFirstInvalidField(fields) {
+      return fields.find(field => !field.checkValidity());
+    }
+
+    function focusInvalidField(field) {
+      if (!field) return;
+
+      const depMatch = field.name.match(/^dependente_(\d+)_/);
+      if (depMatch) {
+        showDependentPanel(Number(depMatch[1]));
+      }
+
+      if (field.type === "file") {
+        const tile = field.closest(".upload-tile");
+        if (tile) {
+          tile.classList.add("needs-attention");
+          setTimeout(() => tile.classList.remove("needs-attention"), 1800);
+          tile.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
+      field.focus({ preventScroll: false });
+      field.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function validateStep(step) {
+      const fields = getFieldsByStep(step);
+      applyFieldValidation(fields);
+      const invalid = getFirstInvalidField(fields);
+      if (invalid) {
+        invalidSteps.add(step);
+        renderStepErrors(step);
+        focusInvalidField(invalid);
+        return false;
+      }
+      invalidSteps.delete(step);
+      renderStepErrors(step);
+      return true;
+    }
+
+    function validateAll() {
+      for (let step = 1; step <= stepMeta.length; step += 1) {
+        const fields = getFieldsByStep(step);
+        applyFieldValidation(fields);
+        const invalid = getFirstInvalidField(fields);
+        if (invalid) {
+          invalidSteps.add(step);
+          setStep(step);
+          requestAnimationFrame(() => {
+            renderStepErrors(step);
+            focusInvalidField(invalid);
+          });
+          return false;
+        }
+        invalidSteps.delete(step);
+      }
+      return true;
+    }
+
+    function getProgress() {
+      const fields = getUniqueRequiredFields();
+      let complete = 0;
+
+      fields.forEach(field => {
+        if (field.type === "radio") {
+          if (form.querySelector('input[name="' + field.name + '"]:checked')) complete += 1;
+          return;
+        }
+
+        if (field.type === "checkbox") {
+          if (field.checked) complete += 1;
+          return;
+        }
+
+        if (field.type === "file") {
+          if (field.files[0] && !field.validationMessage) complete += 1;
+          return;
+        }
+
+        if (field.value.trim()) complete += 1;
+      });
+
+      return { total: fields.length, complete };
+    }
+
+    function collectData() {
+      const dependentes = [];
+      for (let i = 1; i <= getDependentsCount(); i += 1) {
+        dependentes.push({
+          nome: form.elements["dependente_" + i + "_nome"]?.value || "",
+          nascimento: form.elements["dependente_" + i + "_nascimento"]?.value || "",
+          parentesco: form.elements["dependente_" + i + "_parentesco"]?.value || ""
+        });
+      }
+
+      const documentos = uploadInputs.map(input => {
+        const file = input.files[0];
+        return {
+          campo: input.name,
+          label: input.dataset.label,
+          obrigatorio: input.required,
+          anexado: Boolean(file),
+          arquivo: file ? {
+            nome: file.name,
+            tipo: file.type || "application/octet-stream",
+            tamanho_bytes: file.size
+          } : null
+        };
+      });
+
+      return {
+        origem: "wizard_documentos_onix",
+        titular: {
+          nome_completo: form.elements.nome_completo.value,
+          sexo: form.querySelector('input[name="sexo"]:checked')?.value || "",
+          nome_mae: form.elements.nome_mae.value,
+          nascimento: form.elements.nascimento.value,
+          cpf: form.elements.cpf.value,
+          email: form.elements.email.value,
+          telefone_fixo: form.elements.telefone_fixo.value,
+          celular: form.elements.celular.value
+        },
+        dependentes: {
+          possui_dependentes: getHasDependents(),
+          quantidade: getDependentsCount(),
+          observacao: form.elements.observacao_dependentes.value,
+          itens: dependentes
+        },
+        vinculo: {
+          corretor: form.elements.corretor.value,
+          regime_contratacao: form.querySelector('input[name="regime_contratacao"]:checked')?.value || "",
+          setor_lotacao: form.elements.setor_lotacao.value,
+          cargo: form.elements.cargo.value,
+          matricula: form.elements.matricula.value
+        },
+        documentos,
+        termos: {
+          solicitacao_auxilio: form.elements.solicitacao_auxilio.checked,
+          autorizacao_desconto: form.elements.autorizacao_desconto.checked,
+          assinatura_nome: form.elements.assinatura_nome.value,
+          observacoes: form.elements.observacoes.value
+        }
+      };
+    }
+
+    function buildWebhookFormData(payload) {
+      const formData = new FormData();
+
+      formData.append("source_app", "onix-wizard-screen");
+      formData.append("submission_id", payload.protocolo);
+      formData.append("submitted_at", payload.enviado_em);
+      formData.append("payload_json", JSON.stringify(payload));
+      formData.append("titular_nome", payload.titular.nome_completo || "");
+      formData.append("titular_cpf", payload.titular.cpf || "");
+      formData.append("titular_celular", payload.titular.celular || "");
+      formData.append("possui_dependentes", String(payload.dependentes.possui_dependentes));
+      formData.append("quantidade_dependentes", String(payload.dependentes.quantidade || 0));
+      formData.append("regime_contratacao", payload.vinculo.regime_contratacao || "");
+      formData.append("matricula", payload.vinculo.matricula || "");
+      formData.append("assinatura_nome", payload.termos.assinatura_nome || "");
+
+      uploadInputs.forEach(input => {
+        const file = input.files[0];
+        if (file) {
+          formData.append(input.name, file, file.name);
+        }
+      });
+
+      return formData;
+    }
+
+    async function saveSubmissionArchive(payload, remoteStatus) {
+      if (!INTEGRATION.saveLocalArchive) return;
+
+      try {
+        const current = getSubmissionArchiveIndex();
+        let arquivosLocais = false;
+
+        try {
+          arquivosLocais = await saveSubmissionFiles(payload.protocolo);
+        } catch (error) {
+          arquivosLocais = false;
+        }
+
+        current.unshift({
+          protocolo: payload.protocolo,
+          enviado_em: payload.enviado_em,
+          remoto: remoteStatus,
+          titular: payload.titular.nome_completo,
+          cpf: payload.titular.cpf,
+          assinatura_nome: payload.termos.assinatura_nome,
+          arquivos_locais: arquivosLocais,
+          documentos: payload.documentos.map(documento => ({
+            campo: documento.campo,
+            label: documento.label,
+            obrigatorio: documento.obrigatorio,
+            anexado: documento.anexado,
+            arquivo: documento.arquivo ? documento.arquivo.nome : null
+          })),
+          payload
+        });
+        setSubmissionArchiveIndex(current);
+      } catch (error) {
+        // no-op
+      }
+    }
+
+    async function sendToWebhook(payload) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), INTEGRATION.requestTimeoutMs);
+
+      try {
+        const response = await fetch(SUBMIT_ENDPOINT, {
+          method: "POST",
+          body: buildWebhookFormData(payload),
+          signal: controller.signal
+        });
+
+        const responseText = await response.text();
+        let parsed;
+        try {
+          parsed = responseText ? JSON.parse(responseText) : null;
+        } catch (error) {
+          parsed = null;
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            parsed?.message
+              || "Proxy respondeu " + response.status + ". " + (responseText || "Sem corpo de resposta.")
+          );
+        }
+
+        return {
+          mode: parsed?.mode || "webhook",
+          ok: true,
+          message: parsed?.message || responseText || "Dados enviados ao webhook com sucesso."
+        };
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    function downloadBlobFile(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+
+    function renderArchiveEmpty(message) {
+      archiveSelection = "";
+      archiveProtocolText.textContent = "Nenhum protocolo selecionado";
+      archiveMetaText.textContent = message;
+      archiveSummary.innerHTML = "";
+      archiveDocs.innerHTML = "";
+      archivePayloadView.textContent = message;
+      downloadArchiveJsonBtn.disabled = true;
+    }
+
+    async function renderArchiveDetails(protocolo) {
+      const items = getSubmissionArchiveIndex();
+      const entry = items.find(item => item.protocolo === protocolo);
+
+      archiveList.querySelectorAll(".archive-item").forEach(button => {
+        button.classList.toggle("is-active", button.dataset.protocol === protocolo);
+      });
+
+      if (!entry) {
+        renderArchiveEmpty("Nenhum envio encontrado para este protocolo.");
+        return;
+      }
+
+      archiveSelection = protocolo;
+      downloadArchiveJsonBtn.disabled = false;
+      archiveProtocolText.textContent = entry.protocolo;
+      archiveMetaText.textContent = "Titular: " + (entry.titular || "Nao informado") + " • Entrega: " + entry.remoto + " • " + entry.enviado_em;
+      archivePayloadView.textContent = JSON.stringify(entry.payload, null, 2);
+
+      const files = entry.arquivos_locais
+        ? await loadSubmissionFiles(protocolo).catch(() => [])
+        : [];
+
+      archiveSummary.innerHTML = `
+        <article class="review-card">
+          <h3>Titular</h3>
+          <div class="summary-row">
+            <span>Nome</span>
+            <strong>${escapeHtml(entry.titular || "Nao informado")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>CPF</span>
+            <strong>${escapeHtml(entry.cpf || "Nao informado")}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Entrega</h3>
+          <div class="summary-row">
+            <span>Modo</span>
+            <strong>${escapeHtml(entry.remoto)}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Arquivos locais</span>
+            <strong>${entry.arquivos_locais ? "Disponiveis" : "Somente metadados"}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Assinatura</h3>
+          <div class="summary-row">
+            <span>Nome digitado</span>
+            <strong>${escapeHtml(entry.assinatura_nome || "Nao informado")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Data</span>
+            <strong>${escapeHtml(entry.enviado_em || "-")}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Documentos</h3>
+          <div class="summary-row">
+            <span>Anexados</span>
+            <strong>${entry.documentos.filter(documento => documento.anexado).length} / ${entry.documentos.length}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Protocolo</span>
+            <strong>${escapeHtml(entry.protocolo)}</strong>
+          </div>
+        </article>
+      `;
+
+      archiveDocs.innerHTML = entry.documentos.map(documento => {
+        const localFile = files.find(file => file.campo === documento.campo);
+        const availabilityText = !documento.anexado
+          ? "Documento nao foi anexado neste envio."
+          : localFile
+            ? localFile.nome + " • " + formatBytes(localFile.tamanho)
+            : "Arquivo nao ficou armazenado localmente. Confira o destino remoto do webhook.";
+
+        return `
+          <article class="archive-doc">
+            <strong>${escapeHtml(documento.label)}</strong>
+            <span>${escapeHtml(availabilityText)}</span>
+            ${localFile
+              ? `<button type="button" class="ghost small-action" data-download-protocol="${escapeHtml(protocolo)}" data-download-field="${escapeHtml(documento.campo)}">Baixar arquivo</button>`
+              : `<span>${documento.obrigatorio ? "Obrigatorio neste fluxo." : "Opcional neste fluxo."}</span>`}
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function refreshArchiveList(selectedProtocol = archiveSelection) {
+      const items = getSubmissionArchiveIndex();
+
+      if (!items.length) {
+        archiveList.innerHTML = `<div class="archive-empty">Nenhum envio arquivado ainda.</div>`;
+        renderArchiveEmpty("Finalize pelo menos um envio para abrir o historico local.");
+        return;
+      }
+
+      archiveList.innerHTML = items.map(item => `
+        <button type="button" class="archive-item ${item.protocolo === selectedProtocol ? "is-active" : ""}" data-protocol="${escapeHtml(item.protocolo)}">
+          <strong>${escapeHtml(item.titular || item.protocolo)}</strong>
+          <small>${escapeHtml(item.protocolo)}</small>
+          <small>${escapeHtml(item.enviado_em || "")}</small>
+        </button>
+      `).join("");
+
+      const protocol = items.some(item => item.protocolo === selectedProtocol)
+        ? selectedProtocol
+        : items[0].protocolo;
+
+      await renderArchiveDetails(protocol);
+    }
+
+    async function openAdminOverlay() {
+      adminOverlay.hidden = false;
+      await refreshArchiveList();
+    }
+
+    function closeAdminOverlay() {
+      adminOverlay.hidden = true;
+    }
+
+    function renderReview() {
+      const payload = collectData();
+      const docsConcluidos = payload.documentos.filter(doc => doc.anexado).length;
+      const dependenteResumo = payload.dependentes.possui_dependentes
+        ? payload.dependentes.quantidade + " dependente(s)"
+        : "Sem dependentes";
+
+      reviewGrid.innerHTML = `
+        <article class="review-card">
+          <h3>Titular</h3>
+          <div class="summary-row">
+            <span>Nome</span>
+            <strong>${escapeHtml(payload.titular.nome_completo || "Nao preenchido")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>CPF</span>
+            <strong>${escapeHtml(payload.titular.cpf || "Nao preenchido")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Celular</span>
+            <strong>${escapeHtml(payload.titular.celular || "Nao preenchido")}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Dependentes</h3>
+          <div class="summary-row">
+            <span>Status</span>
+            <strong>${escapeHtml(dependenteResumo)}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Observacao</span>
+            <strong>${escapeHtml(payload.dependentes.observacao || "Sem observacao")}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Vinculo</h3>
+          <div class="summary-row">
+            <span>Corretor</span>
+            <strong>${escapeHtml(payload.vinculo.corretor || "Nao preenchido")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Matricula</span>
+            <strong>${escapeHtml(payload.vinculo.matricula || "Nao preenchido")}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Documentos</h3>
+          <div class="summary-row">
+            <span>Anexados</span>
+            <strong>${docsConcluidos} / ${payload.documentos.length}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Termos</span>
+            <strong>${payload.termos.solicitacao_auxilio && payload.termos.autorizacao_desconto ? "Aceitos" : "Pendentes"}</strong>
+          </div>
+        </article>
+        <article class="review-card">
+          <h3>Assinatura</h3>
+          <div class="summary-row">
+            <span>Titular assinante</span>
+            <strong>${escapeHtml(payload.termos.assinatura_nome || "Nao informado")}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Observacoes</span>
+            <strong>${escapeHtml(payload.termos.observacoes || "Sem observacao")}</strong>
+          </div>
+        </article>
+      `;
+    }
+
+    function summarizePending(labels) {
+      if (!labels.length) return "Tudo certo nesta etapa.";
+      const visible = labels.slice(0, 2);
+      const extra = labels.length - visible.length;
+      return "Falta: " + visible.join(", ") + (extra > 0 ? " +" + extra : "");
+    }
+
+    function buildQuickStepCopy(step, payload, stepStatus) {
+      if (step === 1) {
+        return payload.titular.nome_completo
+          ? payload.titular.nome_completo
+          : "Nome, sexo e nome da mae.";
+      }
+
+      if (step === 2) {
+        if (payload.titular.cpf || payload.titular.celular) {
+          return "CPF " + (payload.titular.cpf || "-") + " • Celular " + (payload.titular.celular || "-");
+        }
+        return "Nascimento, CPF e celular.";
+      }
+
+      if (step === 3) {
+        if (!form.querySelector('input[name="possui_dependentes"]:checked')) {
+          return "Informe se havera dependentes.";
+        }
+        if (!payload.dependentes.possui_dependentes) {
+          return "Sem dependentes neste envio.";
+        }
+        return payload.dependentes.quantidade + " dependente(s) selecionado(s).";
+      }
+
+      if (step === 4) {
+        if (payload.vinculo.corretor || payload.vinculo.matricula) {
+          return "Corretor " + (payload.vinculo.corretor || "-") + " • Matricula " + (payload.vinculo.matricula || "-");
+        }
+        return "Corretor, regime e matricula.";
+      }
+
+      if (step === 5) {
+        const docsObrigatorios = uploadInputs.filter(input => input.required).length;
+        const docsOk = uploadInputs.filter(input => input.required && input.files[0] && !input.validationMessage).length;
+        return docsOk + " de " + docsObrigatorios + " obrigatorios anexados.";
+      }
+
+      const termosAceitos = payload.termos.solicitacao_auxilio && payload.termos.autorizacao_desconto;
+      if (payload.termos.assinatura_nome) {
+        return (termosAceitos ? "Termos aceitos" : "Termos pendentes") + " • Assinatura: " + payload.termos.assinatura_nome;
+      }
+      return "Termos finais e assinatura.";
+    }
+
+    function renderQuickSummary() {
+      const payload = collectData();
+      quickSummary.innerHTML = stepMeta.map((step, index) => {
+        const stepNumber = index + 1;
+        const stepStatus = getStepStatus(stepNumber);
+        const heading = buildQuickStepCopy(stepNumber, payload, stepStatus);
+        const detail = stepStatus.ready
+          ? "Completo: " + stepStatus.complete + " de " + stepStatus.total + " obrigatorios."
+          : summarizePending(stepStatus.missingLabels);
+
+        return `
+          <article class="summary-chip ${stepNumber === currentStep ? "is-active" : ""}">
+            <span class="status-pill ${stepStatus.ready ? "done" : "pending"}">${stepStatus.ready ? "Completo" : "Faltam " + stepStatus.missing}</span>
+            <strong>${stepNumber}. ${escapeHtml(step.title)}</strong>
+            <span>${escapeHtml(heading)}</span>
+            <small>${escapeHtml(detail)}</small>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderDocStatus() {
+      docStatusList.innerHTML = uploadInputs.map(input => {
+        const file = input.files[0];
+        const state = input.dataset.fileError ? "error" : file ? "done" : input.required ? "pending" : "optional";
+        const label = input.dataset.fileError ? "Erro" : file ? "Recebido" : input.required ? "Pendente" : "Opcional";
+
+        return `
+          <div class="mini-card">
+            <span class="status-pill ${state}">${label}</span>
+            <strong>${escapeHtml(input.dataset.label)}</strong>
+            <span>${input.dataset.fileError ? escapeHtml(input.dataset.fileError) : file ? escapeHtml(file.name) : input.required ? "Aguardando anexo." : "Pode ser enviado depois."}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function updateProgress() {
+      const stats = getProgress();
+      const percent = stats.total ? Math.round((stats.complete / stats.total) * 100) : 0;
+      progressFill.style.width = percent + "%";
+      progressPercent.textContent = percent + "%";
+      progressText.textContent = stats.complete + " de " + stats.total + " concluidos";
+      mobileProgress.textContent = percent + "%";
+      mobileProgressFill.style.width = percent + "%";
+    }
+
+    function saveDraft() {
+      try {
+        const data = { currentStep, activeDependent };
+        Array.from(form.elements).forEach(field => {
+          if (!field.name || field.type === "file") return;
+          if (field.type === "radio") {
+            if (field.checked) data[field.name] = field.value;
+            return;
+          }
+          if (field.type === "checkbox") {
+            data[field.name] = field.checked;
+            return;
+          }
+          data[field.name] = field.value;
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        saveStatus.textContent = "Rascunho salvo as " + new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + ".";
+      } catch (error) {
+        saveStatus.textContent = "Nao foi possivel salvar o rascunho.";
+      }
+    }
+
+    function restoreDraft() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+
+        Object.entries(data).forEach(([name, value]) => {
+          if (name === "currentStep" || name === "activeDependent") return;
+          const fields = Array.from(form.querySelectorAll('[name="' + name + '"]'));
+          if (!fields.length) return;
+
+          const first = fields[0];
+          if (first.type === "radio") {
+            const match = fields.find(field => field.value === String(value));
+            if (match) match.checked = true;
+            return;
+          }
+
+          if (first.type === "checkbox") {
+            first.checked = Boolean(value);
+            return;
+          }
+
+          first.value = value;
+        });
+
+        currentStep = Number(data.currentStep) || 1;
+        activeDependent = Number(data.activeDependent) || 1;
+        saveStatus.textContent = "Rascunho restaurado. Reenvie apenas os arquivos.";
+      } catch (error) {
+        saveStatus.textContent = "Falha ao restaurar o rascunho salvo.";
+      }
+    }
+
+    function clearDraft(resetForm = false) {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        // no-op
+      }
+
+      if (resetForm) {
+        form.reset();
+        currentStep = 1;
+        activeDependent = 1;
+        uploadScrollSnapshot = null;
+        invalidSteps.clear();
+        resultOverlay.hidden = true;
+        syncAll();
+        setStep(1, false);
+        saveStatus.textContent = "Formulario reiniciado.";
+        return;
+      }
+
+      syncAll();
+      saveStatus.textContent = "Rascunho limpo.";
+    }
+
+    function finishResultFlow() {
+      clearDraft(true);
+    }
+
+    function syncSummary() {
+      renderDocStatus();
+      renderQuickSummary();
+      renderReview();
+      updateProgress();
+    }
+
+    function updateWizardChrome() {
+      const meta = stepMeta[currentStep - 1];
+      const stepStatus = getStepStatus(currentStep);
+      stepCounter.textContent = "Etapa " + currentStep + " de " + stepMeta.length;
+      stepDescription.textContent = meta.description;
+      footerTitle.textContent = meta.title;
+      if (stepStatus.ready) {
+        footerHint.textContent = "Etapa pronta para avancar.";
+      } else if (currentStep === 5) {
+        footerHint.textContent = "Faltam " + stepStatus.missing + " documento(s). Toque em 'Anexar arquivo' nos cartoes abaixo.";
+      } else if (currentStep === 6) {
+        footerHint.textContent = "Aceite os termos e repita o nome do titular para concluir com assinatura eletronica.";
+      } else {
+        footerHint.textContent = "Faltam " + stepStatus.missing + " campo(s) obrigatorio(s) nesta etapa.";
+      }
+      currentStage.textContent = meta.title;
+      docSidebarBlock.classList.toggle("hidden", currentStep < 5);
+      prevBtn.disabled = currentStep === 1;
+      nextBtn.classList.toggle("hidden", currentStep === stepMeta.length);
+      submitBtn.classList.toggle("hidden", currentStep !== stepMeta.length);
+      nextBtn.disabled = currentStep === stepMeta.length || isSubmitting;
+      submitBtn.disabled = currentStep !== stepMeta.length || isSubmitting;
+      submitBtn.textContent = isSubmitting ? "Enviando..." : "Finalizar onboarding";
+    }
+
+    function setStep(step, persist = true) {
+      currentStep = Math.min(Math.max(step, 1), stepMeta.length);
+      screens.forEach(screen => {
+        const active = Number(screen.dataset.step) === currentStep;
+        screen.classList.toggle("is-active", active);
+        if (active) {
+          const body = screen.querySelector(".screen-body");
+          if (body) body.scrollTop = 0;
+        }
+      });
+      updateStepNav();
+      updateWizardChrome();
+      renderStepErrors(currentStep);
+      if (persist) saveDraft();
+    }
+
+    function syncAll() {
+      syncDependents();
+      validateCpfField();
+      validatePhoneField(document.getElementById("telefone_fixo"));
+      validatePhoneField(document.getElementById("celular"));
+      validateSignatureField();
+      updateUploadTiles();
+      syncSummary();
+      updateStepNav();
+      updateWizardChrome();
+      renderStepErrors(currentStep);
+    }
+
+    function handleMaskedInput(target) {
+      if (target.dataset.mask === "cpf") {
+        target.value = formatCpf(target.value);
+        validateCpfField();
+      }
+      if (target.dataset.mask === "mobile" || target.dataset.mask === "landline") {
+        target.value = formatPhone(target.value);
+        validatePhoneField(target);
+      }
+    }
+
+    function applyUppercaseField(target) {
+      if (!target?.matches?.("[data-uppercase]")) return;
+
+      const selectionStart = typeof target.selectionStart === "number" ? target.selectionStart : null;
+      const selectionEnd = typeof target.selectionEnd === "number" ? target.selectionEnd : null;
+      const uppercased = target.value.toLocaleUpperCase("pt-BR");
+
+      if (uppercased === target.value) return;
+
+      target.value = uppercased;
+
+      if (selectionStart !== null && selectionEnd !== null) {
+        target.setSelectionRange(selectionStart, selectionEnd);
+      }
+    }
+
+    function configureUppercaseFields() {
+      form.querySelectorAll("[data-uppercase]").forEach(field => {
+        field.setAttribute("autocapitalize", "characters");
+        applyUppercaseField(field);
+      });
+    }
+
+    stepNav.addEventListener("click", event => {
+      const button = event.target.closest(".step-chip");
+      if (!button) return;
+      const targetStep = Number(button.dataset.step);
+      if (targetStep === currentStep) return;
+      if (targetStep < currentStep) {
+        setStep(targetStep);
+        return;
+      }
+      if (validateStep(currentStep)) {
+        setStep(targetStep);
+      }
+    });
+
+    dependentTabs.addEventListener("click", event => {
+      const button = event.target.closest(".dependent-tab");
+      if (!button) return;
+      showDependentPanel(Number(button.dataset.dependentTab));
+    });
+
+    document.querySelectorAll(".upload-tile").forEach(tile => {
+      const input = tile.querySelector(".upload-input");
+      if (!input) return;
+
+      tile.addEventListener("pointerdown", () => {
+        rememberUploadScrollContext(input);
+      });
+    });
+
+    uploadInputs.forEach(input => {
+      input.addEventListener("click", () => {
+        rememberUploadScrollContext(input);
+      });
+    });
+
+    openAdminButtons.forEach(button => {
+      button.classList.toggle("hidden", !isAdminMode);
+      button.addEventListener("click", () => {
+        openAdminOverlay();
+      });
+    });
+
+    form.addEventListener("input", event => {
+      const target = event.target;
+      applyUppercaseField(target);
+      if (target.matches("[data-mask]")) {
+        handleMaskedInput(target);
+      }
+      syncAll();
+      saveDraft();
+    });
+
+    form.addEventListener("change", event => {
+      const target = event.target;
+      if (target.name === "possui_dependentes" || target.id === "quantidade_dependentes") {
+        syncDependents();
+      }
+      if (target.type === "file") {
+        validateFileInput(target);
+        if (target.validationMessage) target.reportValidity();
+        target.blur();
+        restoreUploadScrollContext();
+      }
+      syncAll();
+      saveDraft();
+    });
+
+    form.addEventListener("focusin", event => {
+      if (event.target.type === "file") return;
+      const body = event.target.closest(".screen-body");
+      if (body) {
+        setTimeout(() => {
+          event.target.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+        }, 60);
+      }
+    });
+
+    window.addEventListener("focus", () => {
+      if (uploadScrollSnapshot) {
+        restoreUploadScrollContext();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (!validateStep(currentStep)) return;
+      setStep(currentStep + 1);
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentStep > 1) setStep(currentStep - 1);
+    });
+
+    clearDraftBtn.addEventListener("click", () => {
+      clearDraft(true);
+    });
+
+    closeOverlayBtn.addEventListener("click", () => {
+      finishResultFlow();
+    });
+
+    restartBtn.addEventListener("click", () => {
+      finishResultFlow();
+    });
+
+    closeAdminBtn.addEventListener("click", () => {
+      closeAdminOverlay();
+    });
+
+    refreshArchiveBtn.addEventListener("click", () => {
+      refreshArchiveList();
+    });
+
+    clearArchiveBtn.addEventListener("click", async () => {
+      if (!window.confirm("Limpar todo o historico local de protocolos e arquivos deste navegador?")) return;
+
+      try {
+        localStorage.removeItem(SUBMISSION_ARCHIVE_KEY);
+      } catch (error) {
+        // no-op
+      }
+
+      try {
+        await clearSubmissionFiles();
+      } catch (error) {
+        // no-op
+      }
+
+      await refreshArchiveList();
+      saveStatus.textContent = "Historico local removido.";
+    });
+
+    archiveList.addEventListener("click", event => {
+      const button = event.target.closest(".archive-item");
+      if (!button) return;
+      renderArchiveDetails(button.dataset.protocol);
+    });
+
+    archiveDocs.addEventListener("click", async event => {
+      const button = event.target.closest("[data-download-field]");
+      if (!button) return;
+
+      const files = await loadSubmissionFiles(button.dataset.downloadProtocol).catch(() => []);
+      const file = files.find(item => item.campo === button.dataset.downloadField);
+      if (!file?.blob) return;
+      downloadBlobFile(file.blob, file.nome);
+    });
+
+    downloadArchiveJsonBtn.addEventListener("click", () => {
+      const entry = getSubmissionArchiveIndex().find(item => item.protocolo === archiveSelection);
+      if (!entry) return;
+      downloadBlobFile(
+        new Blob([JSON.stringify(entry.payload, null, 2)], { type: "application/json" }),
+        entry.protocolo + ".json"
+      );
+    });
+
+    adminOverlay.addEventListener("click", event => {
+      if (event.target === adminOverlay) closeAdminOverlay();
+    });
+
+    resultOverlay.addEventListener("click", event => {
+      if (event.target === resultOverlay) finishResultFlow();
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (isSubmitting) return;
+      if (!validateAll()) return;
+
+      const payload = collectData();
+      const protocol = "ONX-" + Date.now().toString().slice(-8);
+      const submittedAt = new Date().toLocaleString("pt-BR");
+
+      payload.protocolo = protocol;
+      payload.enviado_em = submittedAt;
+      payload.termos.aceite_registrado_em = submittedAt;
+      isSubmitting = true;
+      updateWizardChrome();
+
+      try {
+        const delivery = await sendToWebhook(payload);
+        await saveSubmissionArchive(payload, delivery.mode);
+
+        protocolText.textContent = "Protocolo: " + protocol;
+        resultMeta.textContent = delivery.mode === "webhook"
+          ? "Cadastro concluido em " + submittedAt + ". Guarde este protocolo para acompanhamento."
+          : "Cadastro registrado em " + submittedAt + ". Guarde este protocolo para acompanhamento.";
+        payloadView.textContent = isAdminMode ? JSON.stringify(payload, null, 2) : "";
+        resultOverlay.hidden = false;
+
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+          // no-op
+        }
+        saveStatus.textContent = delivery.mode === "webhook"
+          ? "Cadastro concluido com sucesso."
+          : "Cadastro registrado com sucesso.";
+        if (!adminOverlay.hidden) {
+          await refreshArchiveList(protocol);
+        }
+      } catch (error) {
+        invalidSteps.add(currentStep);
+        renderStepErrors(currentStep);
+        protocolText.textContent = "Nao foi possivel concluir o envio";
+        resultMeta.textContent = "Verifique sua conexao e tente novamente em alguns instantes.";
+        payloadView.textContent = isAdminMode
+          ? JSON.stringify({
+            erro: String(error.message || error),
+            payload
+          }, null, 2)
+          : "";
+        resultOverlay.hidden = false;
+        saveStatus.textContent = "Nao foi possivel concluir o envio agora. O rascunho foi mantido.";
+      } finally {
+        isSubmitting = false;
+        updateWizardChrome();
+      }
+    });
+
+    renderDependentPanels();
+    configureUppercaseFields();
+    payloadView.classList.toggle("hidden", !isAdminMode);
+    refreshIntegrationStatus();
+    updateStepNav();
+    restoreDraft();
+    syncAll();
+    setStep(currentStep, false);
+  </script>
+</body>
+</html>
