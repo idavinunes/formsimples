@@ -77,16 +77,78 @@ sudo systemctl status onix-form
 sudo journalctl -u onix-form -n 100 --no-pager
 ```
 
+## Implantacao recomendada
+
+Fluxo base no servidor Ubuntu 22.04:
+
+```bash
+cd /opt
+sudo git clone https://github.com/idavinunes/formsimples.git
+sudo chown -R $USER:$USER formsimples
+cd formsimples
+chmod +x scripts/*.sh
+./scripts/setup-ubuntu-22.04.sh
+```
+
+Durante o preenchimento do `.env`, defina o `HOST` conforme o seu cenario:
+
+- `HOST=127.0.0.1`: quando o `cloudflared` roda na mesma maquina do formulario
+- `HOST=0.0.0.0`: quando o `cloudflared` roda em outra maquina da rede e vai acessar pelo IP do servidor
+
+Depois de mudar o `.env`, reinicie o servico:
+
+```bash
+sudo systemctl restart onix-form
+```
+
+## Como validar antes de apontar o tunnel
+
+No proprio servidor:
+
+```bash
+sudo systemctl status onix-form
+curl http://127.0.0.1:4173/api/health
+curl -I http://127.0.0.1:4173/
+sudo journalctl -u onix-form -n 100 --no-pager
+```
+
+O esperado:
+
+- `active (running)` no `systemctl`
+- `{"ok":true,...}` no `/api/health`
+- `200 OK` no `curl -I /`
+
+Se o `cloudflared` estiver em outra maquina da rede, valide tambem a partir dela:
+
+```bash
+curl http://IP_DO_SERVIDOR:4173/api/health
+curl -I http://IP_DO_SERVIDOR:4173/
+```
+
+Se esse teste remoto nao responder:
+
+- confira se o `HOST` esta em `0.0.0.0`
+- reinicie o servico
+- confira firewall e rota da rede local
+
 ## Uso com Cloudflare Tunnel
 
 Se voce ja usa `cloudflared`, nao precisa de `nginx`.
 
 Use o projeto assim:
 
-- `HOST=127.0.0.1`
+- `HOST=127.0.0.1` se o tunnel estiver na mesma maquina
+- `HOST=0.0.0.0` se o tunnel estiver em outra maquina da rede
 - `PORT=4173` ou outra porta local livre
 - o servico `systemd` sobe o `server.js`
-- o `cloudflared` aponta para `http://127.0.0.1:4173`
+- o `cloudflared` aponta para o endereco local correto
+
+Exemplos:
+
+- mesma maquina:
+  `service: http://127.0.0.1:4173`
+- outra maquina da rede:
+  `service: http://IP_DO_SERVIDOR:4173`
 
 Exemplo de destino do tunnel:
 
@@ -97,10 +159,11 @@ ingress:
   - service: http_status:404
 ```
 
-Nesse modelo:
+Observacoes desse modelo:
 
-- o Node fica acessivel apenas localmente
-- o Cloudflare faz a exposicao externa
+- se o `cloudflared` estiver na mesma maquina, o Node pode ficar apenas em `127.0.0.1`
+- se o `cloudflared` estiver em outra maquina, o Node precisa ouvir em `0.0.0.0`
+- em ambos os casos, o Cloudflare faz a exposicao externa
 - nao precisa abrir a porta na internet
 
 ## Contrato do proxy

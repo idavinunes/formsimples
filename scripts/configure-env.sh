@@ -130,7 +130,7 @@ echo "Projeto: ${ROOT_DIR}"
 echo
 
 port="$(prompt_number "Porta local do servidor" "$default_port" 1 65535)"
-host="$(prompt_value "Host do servidor (use 127.0.0.1 com cloudflared)" "$default_host")"
+host="$(prompt_value "Host do servidor (127.0.0.1 mesma maquina / 0.0.0.0 outra maquina da rede)" "$default_host")"
 webhook_url="$(prompt_value "URL do webhook do n8n" "$default_webhook_url")"
 
 auth_default="nao"
