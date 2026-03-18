@@ -109,15 +109,18 @@ prompt_number() {
 }
 
 current_port="$(get_value PORT "$ENV_FILE")"
+current_host="$(get_value HOST "$ENV_FILE")"
 current_webhook_url="$(get_value WEBHOOK_URL "$ENV_FILE")"
 current_auth_name="$(get_value WEBHOOK_AUTH_HEADER_NAME "$ENV_FILE")"
 current_auth_value="$(get_value WEBHOOK_AUTH_HEADER_VALUE "$ENV_FILE")"
 current_timeout="$(get_value PROXY_TIMEOUT_MS "$ENV_FILE")"
 
+default_host="${current_host:-$(get_value HOST "$EXAMPLE_FILE")}"
 default_port="${current_port:-$(get_value PORT "$EXAMPLE_FILE")}"
 default_webhook_url="${current_webhook_url:-$(get_value WEBHOOK_URL "$EXAMPLE_FILE")}"
 default_timeout="${current_timeout:-$(get_value PROXY_TIMEOUT_MS "$EXAMPLE_FILE")}"
 
+default_host="${default_host:-127.0.0.1}"
 default_port="${default_port:-4173}"
 default_timeout="${default_timeout:-45000}"
 
@@ -127,6 +130,7 @@ echo "Projeto: ${ROOT_DIR}"
 echo
 
 port="$(prompt_number "Porta local do servidor" "$default_port" 1 65535)"
+host="$(prompt_value "Host do servidor (use 127.0.0.1 com cloudflared)" "$default_host")"
 webhook_url="$(prompt_value "URL do webhook do n8n" "$default_webhook_url")"
 
 auth_default="nao"
@@ -153,6 +157,7 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 {
+  printf 'HOST=%s\n' "$host"
   printf 'PORT=%s\n' "$port"
   printf 'WEBHOOK_URL=%s\n' "$webhook_url"
   printf 'WEBHOOK_AUTH_HEADER_NAME=%s\n' "$auth_header_name"
@@ -162,6 +167,7 @@ fi
 
 echo
 echo "Arquivo .env atualizado com sucesso."
+echo "- HOST=${host}"
 echo "- PORT=${port}"
 if [[ -n "$webhook_url" ]]; then
   echo "- WEBHOOK_URL configurado"

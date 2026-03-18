@@ -66,6 +66,7 @@ function loadConfig() {
   };
 
   return {
+    host: String(merged.HOST || "127.0.0.1").trim() || "127.0.0.1",
     port: Math.max(1, Number(merged.PORT) || 4173),
     webhookUrl: String(merged.WEBHOOK_URL || "").trim(),
     authHeaderName: String(merged.WEBHOOK_AUTH_HEADER_NAME || "").trim(),
@@ -210,6 +211,8 @@ const server = http.createServer(async (req, res) => {
     const config = loadConfig();
     sendJson(res, 200, {
       ok: true,
+      host: config.host,
+      port: config.port,
       webhookConfigured: Boolean(config.webhookUrl),
       configSource: ".env do servidor",
       timeoutMs: config.timeoutMs
@@ -231,8 +234,8 @@ const server = http.createServer(async (req, res) => {
 });
 
 const config = loadConfig();
-server.listen(config.port, () => {
-  console.log("Servidor Onix em http://127.0.0.1:" + config.port);
+server.listen(config.port, config.host, () => {
+  console.log("Servidor Onix em http://" + config.host + ":" + config.port);
   console.log(
     config.webhookUrl
       ? "Webhook protegido carregado do .env."

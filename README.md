@@ -20,6 +20,7 @@ cp .env.example .env
 2. Edite o `.env` com a URL do seu webhook do n8n:
 
 ```env
+HOST=127.0.0.1
 PORT=4173
 WEBHOOK_URL=https://seu-n8n/webhook/onix-documentos
 WEBHOOK_AUTH_HEADER_NAME=
@@ -60,7 +61,7 @@ Esse fluxo faz:
 - checagem do Ubuntu 22.04
 - instalacao opcional do Node.js 20
 - preenchimento interativo do `.env`
-- criacao do servico `systemd`
+- criacao do servico `systemd` local
 
 Se preferir por etapas:
 
@@ -75,6 +76,32 @@ Depois da instalacao do servico:
 sudo systemctl status onix-form
 sudo journalctl -u onix-form -n 100 --no-pager
 ```
+
+## Uso com Cloudflare Tunnel
+
+Se voce ja usa `cloudflared`, nao precisa de `nginx`.
+
+Use o projeto assim:
+
+- `HOST=127.0.0.1`
+- `PORT=4173` ou outra porta local livre
+- o servico `systemd` sobe o `server.js`
+- o `cloudflared` aponta para `http://127.0.0.1:4173`
+
+Exemplo de destino do tunnel:
+
+```yaml
+ingress:
+  - hostname: onixform.seudominio.com.br
+    service: http://127.0.0.1:4173
+  - service: http_status:404
+```
+
+Nesse modelo:
+
+- o Node fica acessivel apenas localmente
+- o Cloudflare faz a exposicao externa
+- nao precisa abrir a porta na internet
 
 ## Contrato do proxy
 
